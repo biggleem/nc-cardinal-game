@@ -31,13 +31,14 @@
             background: #0a0a0a;
             min-height: 100vh;
             color: white;
-            overflow: hidden;
+            overflow-x: hidden;
+            overflow-y: auto;
             position: relative;
         }
         
         body::before {
             content: '';
-            position: absolute;
+            position: fixed;
             top: 0;
             left: 0;
             right: 0;
@@ -49,14 +50,14 @@
         .game-container {
             display: flex;
             flex-direction: column;
-            height: 100vh;
+            min-height: 100vh;
             max-width: 500px;
             margin: 0 auto;
         }
         
         .header {
             background: rgba(0,0,0,0.8);
-            padding: 20px;
+            padding: 15px 20px;
             text-align: center;
             backdrop-filter: blur(20px);
             border-bottom: 1px solid rgba(220,20,60,0.3);
@@ -70,9 +71,9 @@
         }
         
         .balance {
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: 900;
-            margin: 15px 0;
+            margin: 10px 0;
             text-shadow: 0 0 30px rgba(255,215,0,0.5), 0 2px 10px rgba(0,0,0,0.8);
             letter-spacing: 2px;
         }
@@ -84,12 +85,79 @@
             background-clip: text;
         }
         
+        .streak-display {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 8px 0;
+            font-size: 0.9em;
+        }
+        
+        .streak-badge {
+            background: linear-gradient(135deg, rgba(255,100,50,0.3), rgba(255,50,50,0.2));
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,100,50,0.5);
+        }
+        
+        .streak-badge.active {
+            background: linear-gradient(135deg, rgba(255,100,50,0.6), rgba(255,50,50,0.4));
+            box-shadow: 0 0 15px rgba(255,100,50,0.4);
+        }
+        
+        .daily-clicks-display {
+            background: rgba(255,215,0,0.1);
+            padding: 5px 12px;
+            border-radius: 20px;
+            border: 1px solid rgba(255,215,0,0.3);
+        }
+        
+        .level-section {
+            margin: 10px auto;
+            width: 90%;
+        }
+        
+        .level-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 5px;
+            font-size: 0.85em;
+        }
+        
+        .level-rank {
+            font-weight: bold;
+            padding: 3px 10px;
+            border-radius: 10px;
+        }
+        
+        .level-rank.bronze { background: linear-gradient(135deg, #cd7f32, #8b4513); }
+        .level-rank.silver { background: linear-gradient(135deg, #c0c0c0, #808080); }
+        .level-rank.gold { background: linear-gradient(135deg, #FFD700, #FFA500); color: #000; }
+        .level-rank.diamond { background: linear-gradient(135deg, #b9f2ff, #00bfff); color: #000; }
+        
+        .xp-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        
+        .xp-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #9333ea, #c084fc);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(147,51,234,0.6);
+        }
+        
         .energy-bar {
             width: 80%;
-            height: 25px;
+            height: 20px;
             background: rgba(255,255,255,0.1);
-            border-radius: 15px;
-            margin: 15px auto;
+            border-radius: 10px;
+            margin: 10px auto;
             overflow: hidden;
             position: relative;
             border: 1px solid rgba(255,215,0,0.2);
@@ -107,8 +175,25 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-size: 0.9em;
+            font-size: 0.8em;
             font-weight: bold;
+        }
+        
+        .cooldown-indicator {
+            margin: 5px auto;
+            font-size: 0.85em;
+            color: rgba(255,255,255,0.7);
+            height: 20px;
+        }
+        
+        .cooldown-indicator.active {
+            color: #ff6b6b;
+            animation: pulse-cooldown 0.5s ease-in-out infinite;
+        }
+        
+        @keyframes pulse-cooldown {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
         }
         
         .tap-area {
@@ -117,11 +202,12 @@
             align-items: center;
             justify-content: center;
             padding: 20px;
+            min-height: 300px;
         }
         
         .coin {
-            width: 280px;
-            height: 280px;
+            width: 250px;
+            height: 250px;
             background: #0a0a0a;
             border-radius: 30px;
             cursor: pointer;
@@ -133,7 +219,12 @@
             overflow: hidden;
         }
         
-        .coin:hover {
+        .coin.cooldown {
+            opacity: 0.6;
+            filter: grayscale(50%);
+        }
+        
+        .coin:hover:not(.cooldown) {
             transform: translateY(-5px);
             box-shadow: 0 25px 80px rgba(220,20,60,0.4), 0 15px 40px rgba(0,0,0,0.9);
             border-color: rgba(255,215,0,0.9);
@@ -148,7 +239,7 @@
             image-rendering: crisp-edges;
             filter: drop-shadow(0 0 20px rgba(220,20,60,0.6));
             animation: float 3s ease-in-out infinite;
-            mix-blend-mode: multiply;
+            
         }
         
         @keyframes float {
@@ -156,7 +247,7 @@
             50% { transform: translateY(-10px); }
         }
         
-        .coin:active {
+        .coin:active:not(.cooldown) {
             transform: scale(0.95);
         }
         
@@ -183,26 +274,54 @@
         
         .tap-effect {
             position: absolute;
+            font-size: 2em;
+            font-weight: 900;
+            pointer-events: none;
+            animation: floatUp 1.5s ease-out;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        }
+        
+        .tap-effect.normal {
             background: linear-gradient(135deg, #FFD700, #FFA500);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            font-size: 2.5em;
-            font-weight: 900;
-            pointer-events: none;
-            animation: floatUp 1.5s ease-out;
-            text-shadow: 0 0 30px rgba(255,215,0,0.8);
-            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.8));
+        }
+        
+        .tap-effect.streak-3 {
+            background: linear-gradient(135deg, #ff6b6b, #ffa500);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tap-effect.streak-7 {
+            background: linear-gradient(135deg, #9333ea, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        .tap-effect.streak-30 {
+            background: linear-gradient(135deg, #00bfff, #b9f2ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 20px rgba(0,191,255,0.8);
         }
         
         @keyframes floatUp {
             0% {
                 opacity: 1;
-                transform: translateY(0);
+                transform: translateY(0) scale(1);
+            }
+            50% {
+                opacity: 1;
+                transform: translateY(-50px) scale(1.2);
             }
             100% {
                 opacity: 0;
-                transform: translateY(-100px);
+                transform: translateY(-100px) scale(0.8);
             }
         }
         
@@ -224,13 +343,61 @@
             }
         }
         
+        /* Badges Section */
+        .badges-section {
+            background: rgba(0,0,0,0.8);
+            padding: 15px;
+            backdrop-filter: blur(20px);
+            border-top: 1px solid rgba(220,20,60,0.3);
+        }
+        
+        .badges-title {
+            text-align: center;
+            font-size: 0.9em;
+            margin-bottom: 10px;
+            color: rgba(255,255,255,0.8);
+        }
+        
+        .badges-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .badge {
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3em;
+            background: rgba(255,255,255,0.05);
+            border: 2px solid rgba(255,255,255,0.1);
+            opacity: 0.3;
+            transition: all 0.3s ease;
+        }
+        
+        .badge.unlocked {
+            opacity: 1;
+            background: linear-gradient(135deg, rgba(255,215,0,0.3), rgba(255,165,0,0.2));
+            border-color: rgba(255,215,0,0.6);
+            box-shadow: 0 0 15px rgba(255,215,0,0.3);
+        }
+        
+        .badge.unlocked:hover {
+            transform: scale(1.1);
+            box-shadow: 0 0 25px rgba(255,215,0,0.5);
+        }
+        
         .upgrades {
             background: rgba(0,0,0,0.8);
-            padding: 20px;
+            padding: 15px;
             backdrop-filter: blur(20px);
             display: flex;
             justify-content: space-around;
-            gap: 15px;
+            gap: 10px;
             border-top: 1px solid rgba(220,20,60,0.3);
         }
         
@@ -238,12 +405,12 @@
             background: rgba(0,0,0,0.6);
             border: 1px solid rgba(255,215,0,0.4);
             border-radius: 15px;
-            padding: 15px;
+            padding: 12px;
             color: white;
             cursor: pointer;
             transition: all 0.3s ease;
             flex: 1;
-            font-size: 0.9em;
+            font-size: 0.85em;
             position: relative;
             overflow: hidden;
         }
@@ -280,21 +447,22 @@
         }
         
         .upgrade-info {
-            font-size: 0.8em;
+            font-size: 0.75em;
             opacity: 0.8;
         }
         
         .stats {
             background: rgba(0,0,0,0.8);
-            padding: 15px;
+            padding: 12px;
             text-align: center;
-            font-size: 0.9em;
+            font-size: 0.8em;
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(220,20,60,0.3);
             color: rgba(255,255,255,0.8);
             display: flex;
             justify-content: space-around;
             flex-wrap: wrap;
+            gap: 5px;
         }
         
         .stats span {
@@ -315,6 +483,7 @@
             text-align: center;
             z-index: 1000;
             animation: slideDown 0.5s ease-out;
+            max-width: 90%;
         }
         
         @keyframes slideDown {
@@ -328,18 +497,52 @@
             }
         }
         
+        /* Daily Bonus Popup */
+        .daily-bonus-popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: linear-gradient(135deg, #9333ea, #6b21a8);
+            color: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(147,51,234,0.5);
+            text-align: center;
+            z-index: 1001;
+            animation: bonusPop 0.5s ease-out;
+        }
+        
+        .daily-bonus-popup h2 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+        
+        .daily-bonus-popup .bonus-amount {
+            font-size: 3em;
+            font-weight: 900;
+            color: #FFD700;
+            text-shadow: 0 0 20px rgba(255,215,0,0.8);
+        }
+        
+        @keyframes bonusPop {
+            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1.1); }
+            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+        
         .community-links {
             background: rgba(0,0,0,0.8);
-            padding: 15px;
+            padding: 12px;
             text-align: center;
-            font-size: 0.9em;
+            font-size: 0.85em;
             backdrop-filter: blur(20px);
             border-top: 1px solid rgba(220,20,60,0.3);
         }
         
         .community-links a {
             color: rgba(255,215,0,0.8);
-            margin: 0 10px;
+            margin: 0 8px;
             text-decoration: none;
             transition: all 0.3s ease;
             display: inline-block;
@@ -349,6 +552,29 @@
             color: #FFD700;
             transform: translateY(-2px);
             text-shadow: 0 0 20px rgba(255,215,0,0.6);
+        }
+        
+        /* Sound Toggle */
+        .sound-toggle {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,215,0,0.4);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            z-index: 100;
+            font-size: 1.2em;
+            transition: all 0.3s ease;
+        }
+        
+        .sound-toggle:hover {
+            background: rgba(255,215,0,0.2);
         }
         
         .intro-modal {
@@ -366,7 +592,7 @@
         }
         
         .intro-content {
-            background: #000;
+            
             border: 2px solid rgba(255,215,0,0.6);
             border-radius: 30px;
             padding: 40px;
@@ -399,8 +625,8 @@
             width: 200px;
             height: auto;
             margin: 25px 0;
-            background: #000;
-            mix-blend-mode: multiply;
+            
+            
             border-radius: 10px;
         }
         
@@ -518,6 +744,9 @@
         }
     </style>
     
+    <!-- Sound Toggle -->
+    <div class="sound-toggle" id="sound-toggle" onclick="toggleSound()">🔇</div>
+    
     <div class="particles" id="particles"></div>
     <div class="intro-modal" id="intro">
         <div class="intro-content">
@@ -532,17 +761,43 @@
     <div class="game-container">
         <div class="header">
             <div class="logo-container">
-                <img src="nc-logo.png" alt="NC Blockchain" style="height: 60px; margin-bottom: 10px;">
+                <img src="nc-logo.png" alt="NC Blockchain" style="height: 50px; margin-bottom: 5px;">
             </div>
             <div class="balance">
                 <span class="coins" id="balance">0</span> $CARD
             </div>
+            
+            <!-- Streak and Daily Clicks Display -->
+            <div class="streak-display">
+                <div class="streak-badge" id="streak-badge">
+                    🔥 <span id="streak-count">0</span> day streak
+                </div>
+                <div class="daily-clicks-display">
+                    📊 <span id="daily-clicks-remaining">1000</span>/1000
+                </div>
+            </div>
+            
+            <!-- Level Section -->
+            <div class="level-section">
+                <div class="level-info">
+                    <span>Level <span id="level">1</span></span>
+                    <span class="level-rank bronze" id="level-rank">Bronze</span>
+                    <span><span id="xp">0</span>/<span id="xp-needed">100</span> XP</span>
+                </div>
+                <div class="xp-bar">
+                    <div class="xp-fill" id="xp-fill"></div>
+                </div>
+            </div>
+            
             <div class="energy-bar">
                 <div class="energy-fill" id="energy-fill"></div>
                 <div class="energy-text">
                     <span id="energy">100</span>/<span id="energy-max">100</span> ⚡
                 </div>
             </div>
+            
+            <!-- Cooldown Indicator -->
+            <div class="cooldown-indicator" id="cooldown-indicator"></div>
         </div>
         
         <div class="tap-area" id="tap-area">
@@ -554,8 +809,21 @@
         <div class="stats">
             Total Taps: <span id="total-taps">0</span> | 
             Tap Power: <span id="tap-power">1</span>x |
-            Regen: <span id="regen-rate">1</span>/s |
-            Cardinal: <span id="cardinal-level">Baby</span>
+            Multiplier: <span id="streak-multiplier">1.0</span>x |
+            Regen: <span id="regen-rate">1</span>/s
+        </div>
+        
+        <!-- Badges Section -->
+        <div class="badges-section">
+            <div class="badges-title">🏆 Badges</div>
+            <div class="badges-grid" id="badges-grid">
+                <div class="badge" id="badge-first-click" title="First Click">👆</div>
+                <div class="badge" id="badge-streak-7" title="7-Day Streak">🔥</div>
+                <div class="badge" id="badge-streak-30" title="30-Day Streak">💎</div>
+                <div class="badge" id="badge-clicks-1k" title="1,000 Clicks">🎯</div>
+                <div class="badge" id="badge-clicks-10k" title="10,000 Clicks">🚀</div>
+                <div class="badge" id="badge-early-adopter" title="Early Adopter">⭐</div>
+            </div>
         </div>
         
         <div class="achievements" id="achievements" style="display: none;">
@@ -585,8 +853,20 @@
             <a href="https://github.com/biggleem/nc-cardinal-game" target="_blank">💻 GitHub</a>
         </div>
     </div>
+    
+    <!-- Daily Bonus Popup -->
+    <div class="daily-bonus-popup" id="daily-bonus-popup" style="display: none;">
+        <h2>🎉 Daily Bonus!</h2>
+        <div class="bonus-amount">+<span id="bonus-amount">0</span></div>
+        <p>$CARD tokens!</p>
+    </div>
 
     <script>
+        // Constants
+        const DAILY_CLICK_CAP = 1000;
+        const COOLDOWN_MS = 3000;
+        const EARLY_ADOPTER_CUTOFF = new Date('2026-02-01').getTime();
+        
         // Game state
         let gameData = {
             balance: 0,
@@ -596,16 +876,290 @@
             totalTaps: 0,
             regenRate: 1,
             cardinalLevel: 1,
-            achievements: []
+            achievements: [],
+            // New fields
+            level: 1,
+            xp: 0,
+            streak: 0,
+            lastStreakDate: null,
+            lastClickDate: null,
+            dailyClicks: 0,
+            dailyBonusCollected: null,
+            badges: [],
+            joinDate: null,
+            soundEnabled: false
         };
+        
+        // Cooldown tracking
+        let lastClickTime = 0;
+        let cooldownInterval = null;
+        
+        // Audio context for sound effects
+        let audioContext = null;
+        
+        // Initialize audio
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio not supported');
+            }
+        }
+        
+        // Play click sound
+        function playClickSound() {
+            if (!gameData.soundEnabled || !audioContext) return;
+            
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            
+            oscillator.frequency.setValueAtTime(800, audioContext.currentTime);
+            oscillator.frequency.exponentialRampToValueAtTime(400, audioContext.currentTime + 0.1);
+            
+            gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+            
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + 0.1);
+        }
+        
+        // Play bonus sound
+        function playBonusSound() {
+            if (!gameData.soundEnabled || !audioContext) return;
+            
+            const notes = [523, 659, 784, 1047];
+            notes.forEach((freq, i) => {
+                setTimeout(() => {
+                    const oscillator = audioContext.createOscillator();
+                    const gainNode = audioContext.createGain();
+                    
+                    oscillator.connect(gainNode);
+                    gainNode.connect(audioContext.destination);
+                    
+                    oscillator.frequency.setValueAtTime(freq, audioContext.currentTime);
+                    gainNode.gain.setValueAtTime(0.2, audioContext.currentTime);
+                    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.2);
+                    
+                    oscillator.start(audioContext.currentTime);
+                    oscillator.stop(audioContext.currentTime + 0.2);
+                }, i * 100);
+            });
+        }
+        
+        // Toggle sound
+        function toggleSound() {
+            gameData.soundEnabled = !gameData.soundEnabled;
+            document.getElementById('sound-toggle').textContent = gameData.soundEnabled ? '🔊' : '🔇';
+            
+            if (gameData.soundEnabled && !audioContext) {
+                initAudio();
+            }
+            
+            saveGameData();
+        }
+        
+        // Get today's date string
+        function getTodayString() {
+            return new Date().toDateString();
+        }
+        
+        // Check if it's a new day
+        function isNewDay() {
+            return gameData.lastClickDate !== getTodayString();
+        }
+        
+        // Calculate streak multiplier
+        function getStreakMultiplier() {
+            if (gameData.streak >= 30) return 1.5;
+            if (gameData.streak >= 7) return 1.25;
+            if (gameData.streak >= 3) return 1.1;
+            return 1.0;
+        }
+        
+        // Get XP needed for level
+        function getXPForLevel(level) {
+            return Math.floor(100 * Math.pow(1.5, level - 1));
+        }
+        
+        // Get rank name and class
+        function getRankInfo(level) {
+            if (level >= 31) return { name: 'Diamond', class: 'diamond' };
+            if (level >= 21) return { name: 'Gold', class: 'gold' };
+            if (level >= 11) return { name: 'Silver', class: 'silver' };
+            return { name: 'Bronze', class: 'bronze' };
+        }
+        
+        // Check and update streak
+        function updateStreak() {
+            const today = getTodayString();
+            const yesterday = new Date(Date.now() - 86400000).toDateString();
+            
+            if (gameData.lastStreakDate === yesterday) {
+                // Continue streak
+                gameData.streak++;
+                gameData.lastStreakDate = today;
+            } else if (gameData.lastStreakDate !== today) {
+                // Reset streak (missed a day) or first day
+                if (gameData.lastStreakDate !== null && gameData.lastStreakDate !== yesterday) {
+                    gameData.streak = 1;
+                } else if (gameData.lastStreakDate === null) {
+                    gameData.streak = 1;
+                }
+                gameData.lastStreakDate = today;
+            }
+        }
+        
+        // Check and award badges
+        function checkBadges() {
+            const newBadges = [];
+            
+            // First Click
+            if (gameData.totalTaps >= 1 && !gameData.badges.includes('first-click')) {
+                gameData.badges.push('first-click');
+                newBadges.push('👆 First Click!');
+            }
+            
+            // 7-day streak
+            if (gameData.streak >= 7 && !gameData.badges.includes('streak-7')) {
+                gameData.badges.push('streak-7');
+                newBadges.push('🔥 7-Day Streak!');
+            }
+            
+            // 30-day streak
+            if (gameData.streak >= 30 && !gameData.badges.includes('streak-30')) {
+                gameData.badges.push('streak-30');
+                newBadges.push('💎 30-Day Streak!');
+            }
+            
+            // 1,000 clicks
+            if (gameData.totalTaps >= 1000 && !gameData.badges.includes('clicks-1k')) {
+                gameData.badges.push('clicks-1k');
+                newBadges.push('🎯 1,000 Clicks!');
+            }
+            
+            // 10,000 clicks
+            if (gameData.totalTaps >= 10000 && !gameData.badges.includes('clicks-10k')) {
+                gameData.badges.push('clicks-10k');
+                newBadges.push('🚀 10,000 Clicks!');
+            }
+            
+            // Early Adopter
+            if (gameData.joinDate && gameData.joinDate < EARLY_ADOPTER_CUTOFF && !gameData.badges.includes('early-adopter')) {
+                gameData.badges.push('early-adopter');
+                newBadges.push('⭐ Early Adopter!');
+            }
+            
+            // Show badge notifications
+            newBadges.forEach((badge, i) => {
+                setTimeout(() => showAchievement(`Badge Unlocked: ${badge}`), i * 3500);
+            });
+            
+            updateBadgesUI();
+        }
+        
+        // Update badges UI
+        function updateBadgesUI() {
+            const badgeMap = {
+                'first-click': 'badge-first-click',
+                'streak-7': 'badge-streak-7',
+                'streak-30': 'badge-streak-30',
+                'clicks-1k': 'badge-clicks-1k',
+                'clicks-10k': 'badge-clicks-10k',
+                'early-adopter': 'badge-early-adopter'
+            };
+            
+            Object.entries(badgeMap).forEach(([key, elementId]) => {
+                const element = document.getElementById(elementId);
+                if (element) {
+                    if (gameData.badges.includes(key)) {
+                        element.classList.add('unlocked');
+                    } else {
+                        element.classList.remove('unlocked');
+                    }
+                }
+            });
+        }
+        
+        // Show daily bonus
+        function showDailyBonus() {
+            const today = getTodayString();
+            if (gameData.dailyBonusCollected === today) return;
+            
+            const bonus = Math.floor(Math.random() * 91) + 10; // 10-100
+            gameData.balance += bonus;
+            gameData.dailyBonusCollected = today;
+            
+            // Show popup
+            document.getElementById('bonus-amount').textContent = bonus;
+            const popup = document.getElementById('daily-bonus-popup');
+            popup.style.display = 'block';
+            
+            playBonusSound();
+            
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 2500);
+            
+            saveGameData();
+        }
+        
+        // Update cooldown display
+        function updateCooldownDisplay() {
+            const now = Date.now();
+            const remaining = Math.max(0, COOLDOWN_MS - (now - lastClickTime));
+            const indicator = document.getElementById('cooldown-indicator');
+            const coin = document.getElementById('coin');
+            
+            if (remaining > 0) {
+                indicator.textContent = `⏱️ Cooldown: ${(remaining / 1000).toFixed(1)}s`;
+                indicator.classList.add('active');
+                coin.classList.add('cooldown');
+            } else {
+                indicator.textContent = '';
+                indicator.classList.remove('active');
+                coin.classList.remove('cooldown');
+                if (cooldownInterval) {
+                    clearInterval(cooldownInterval);
+                    cooldownInterval = null;
+                }
+            }
+        }
+        
+        // Vibrate (mobile)
+        function vibrate() {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(50);
+            }
+        }
         
         // Load saved data
         function loadGameData() {
             const saved = localStorage.getItem('ncCardinalGame');
             if (saved) {
-                gameData = JSON.parse(saved);
+                const parsed = JSON.parse(saved);
+                gameData = { ...gameData, ...parsed };
             }
+            
+            // Set join date if not set
+            if (!gameData.joinDate) {
+                gameData.joinDate = Date.now();
+            }
+            
+            // Reset daily clicks if new day
+            if (isNewDay()) {
+                gameData.dailyClicks = 0;
+                gameData.lastClickDate = null;
+            }
+            
+            // Update sound toggle
+            document.getElementById('sound-toggle').textContent = gameData.soundEnabled ? '🔊' : '🔇';
+            
             updateUI();
+            updateBadgesUI();
+            checkBadges(); // Check for early adopter badge on load
         }
         
         // Save game data
@@ -618,6 +1172,7 @@
             document.getElementById('intro').style.display = 'none';
             loadGameData();
             generateParticles();
+            initAudio();
             
             // Start energy regeneration
             setInterval(() => {
@@ -644,7 +1199,7 @@
         
         // Update UI
         function updateUI() {
-            document.getElementById('balance').textContent = gameData.balance;
+            document.getElementById('balance').textContent = Math.floor(gameData.balance);
             document.getElementById('energy').textContent = Math.floor(gameData.energy);
             document.getElementById('energy-max').textContent = gameData.energyMax;
             document.getElementById('total-taps').textContent = gameData.totalTaps;
@@ -653,6 +1208,37 @@
             
             const energyPercent = (gameData.energy / gameData.energyMax) * 100;
             document.getElementById('energy-fill').style.width = energyPercent + '%';
+            
+            // Streak display
+            document.getElementById('streak-count').textContent = gameData.streak;
+            const streakBadge = document.getElementById('streak-badge');
+            if (gameData.streak >= 3) {
+                streakBadge.classList.add('active');
+            } else {
+                streakBadge.classList.remove('active');
+            }
+            
+            // Streak multiplier
+            document.getElementById('streak-multiplier').textContent = getStreakMultiplier().toFixed(2);
+            
+            // Daily clicks remaining
+            const remaining = Math.max(0, DAILY_CLICK_CAP - gameData.dailyClicks);
+            document.getElementById('daily-clicks-remaining').textContent = remaining;
+            
+            // Level and XP
+            document.getElementById('level').textContent = gameData.level;
+            const xpNeeded = getXPForLevel(gameData.level);
+            document.getElementById('xp').textContent = Math.floor(gameData.xp);
+            document.getElementById('xp-needed').textContent = xpNeeded;
+            
+            const xpPercent = (gameData.xp / xpNeeded) * 100;
+            document.getElementById('xp-fill').style.width = xpPercent + '%';
+            
+            // Rank
+            const rankInfo = getRankInfo(gameData.level);
+            const rankElement = document.getElementById('level-rank');
+            rankElement.textContent = rankInfo.name;
+            rankElement.className = 'level-rank ' + rankInfo.class;
             
             // Update upgrade costs
             const costs = calculateUpgradeCosts();
@@ -664,9 +1250,6 @@
             document.getElementById('upgrade-power').disabled = gameData.balance < costs.tapPower;
             document.getElementById('upgrade-energy').disabled = gameData.balance < costs.energyMax;
             document.getElementById('upgrade-regen').disabled = gameData.balance < costs.regenRate;
-            
-            // Update cardinal level
-            document.getElementById('cardinal-level').textContent = getCardinalName(gameData.cardinalLevel);
         }
         
         // Calculate upgrade costs
@@ -686,9 +1269,44 @@
         
         // Handle tap
         function handleTap(event) {
+            const now = Date.now();
+            
+            // Check cooldown
+            if (now - lastClickTime < COOLDOWN_MS) {
+                return;
+            }
+            
+            // Check energy
             if (gameData.energy < 1) {
                 return;
             }
+            
+            // Check daily cap
+            if (gameData.dailyClicks >= DAILY_CLICK_CAP) {
+                showAchievement('⏰ Daily limit reached! Come back tomorrow!');
+                return;
+            }
+            
+            // Update click time and start cooldown display
+            lastClickTime = now;
+            if (!cooldownInterval) {
+                cooldownInterval = setInterval(updateCooldownDisplay, 100);
+            }
+            updateCooldownDisplay();
+            
+            // Check if new day - update streak and show daily bonus
+            if (isNewDay()) {
+                updateStreak();
+                gameData.lastClickDate = getTodayString();
+                gameData.dailyClicks = 0;
+                showDailyBonus();
+            }
+            
+            // Vibrate on mobile
+            vibrate();
+            
+            // Play sound
+            playClickSound();
             
             // Visual feedback
             const coin = document.getElementById('coin');
@@ -700,15 +1318,25 @@
                 cardinalImg.classList.remove('flap');
             }, 500);
             
+            // Calculate points with streak multiplier
+            const multiplier = getStreakMultiplier();
+            const pointsEarned = Math.floor(gameData.tapPower * multiplier);
+            
+            // Determine effect class based on streak
+            let effectClass = 'normal';
+            if (gameData.streak >= 30) effectClass = 'streak-30';
+            else if (gameData.streak >= 7) effectClass = 'streak-7';
+            else if (gameData.streak >= 3) effectClass = 'streak-3';
+            
             // Show tap effect
             const tapArea = document.getElementById('tap-area');
             const effect = document.createElement('div');
-            effect.className = 'tap-effect';
-            effect.textContent = `+${gameData.tapPower}`;
+            effect.className = `tap-effect ${effectClass}`;
+            effect.textContent = `+${pointsEarned}`;
             effect.style.left = (event.clientX || tapArea.offsetWidth/2) + 'px';
             effect.style.top = (event.clientY || tapArea.offsetHeight/2) + 'px';
             tapArea.appendChild(effect);
-            setTimeout(() => effect.remove(), 1000);
+            setTimeout(() => effect.remove(), 1500);
             
             // Add feather particles
             for (let i = 0; i < 3; i++) {
@@ -723,8 +1351,21 @@
             
             // Update game state
             gameData.energy -= 1;
-            gameData.balance += gameData.tapPower;
+            gameData.balance += pointsEarned;
             gameData.totalTaps += 1;
+            gameData.dailyClicks += 1;
+            
+            // Add XP (points = XP)
+            gameData.xp += pointsEarned;
+            
+            // Check for level up
+            while (gameData.xp >= getXPForLevel(gameData.level)) {
+                gameData.xp -= getXPForLevel(gameData.level);
+                gameData.level++;
+                const rankInfo = getRankInfo(gameData.level);
+                showAchievement(`🎉 Level Up! Now Level ${gameData.level} (${rankInfo.name})`);
+                playBonusSound();
+            }
             
             // Check for cardinal evolution
             const requirements = [1000, 10000, 50000, 100000];
@@ -734,6 +1375,9 @@
                     showAchievement(`🦅 Cardinal Evolved to ${getCardinalName(gameData.cardinalLevel)}!`);
                 }
             }
+            
+            // Check badges
+            checkBadges();
             
             updateUI();
             saveGameData();
