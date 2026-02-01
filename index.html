@@ -1,0 +1,565 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>NC Blockchain Cardinal Clicker</title>
+    <meta property="og:title" content="NC Blockchain Cardinal Clicker">
+    <meta property="og:description" content="Tap the Cardinal to earn $CARD tokens!">
+    <meta property="og:image" content="https://biggleem.github.io/nc-cardinal-game/cardinal.png">
+    <script src="nc-integration.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #8B0000 0%, #DC143C 100%);
+            min-height: 100vh;
+            color: white;
+            overflow: hidden;
+        }
+        
+        .game-container {
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            text-align: center;
+            backdrop-filter: blur(10px);
+        }
+        
+        .logo-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .balance {
+            font-size: 2.5em;
+            font-weight: bold;
+            margin: 10px 0;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .balance .coins {
+            color: #FFD700;
+        }
+        
+        .energy-bar {
+            width: 80%;
+            height: 20px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 10px;
+            margin: 10px auto;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .energy-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ff00, #00aa00);
+            transition: width 0.3s ease;
+            box-shadow: 0 0 10px rgba(0,255,0,0.5);
+        }
+        
+        .energy-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        
+        .tap-area {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .coin {
+            width: 250px;
+            height: 250px;
+            background: #000;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            cursor: pointer;
+            transition: transform 0.1s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            border: 3px solid #FFD700;
+            overflow: hidden;
+        }
+        
+        .coin img {
+            width: 90%;
+            height: 90%;
+            object-fit: contain;
+            image-rendering: pixelated;
+            image-rendering: -moz-crisp-edges;
+            image-rendering: crisp-edges;
+        }
+        
+        .coin:active {
+            transform: scale(0.95);
+        }
+        
+        .coin.tapped {
+            animation: pulse 0.3s ease-out;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.1) rotate(-5deg); }
+            100% { transform: scale(1) rotate(0deg); }
+        }
+        
+        .coin img.flap {
+            animation: flap 0.5s ease-out;
+        }
+        
+        @keyframes flap {
+            0% { transform: scaleX(1); }
+            25% { transform: scaleX(1.2); }
+            50% { transform: scaleX(0.8); }
+            100% { transform: scaleX(1); }
+        }
+        
+        .tap-effect {
+            position: absolute;
+            color: #FFD700;
+            font-size: 2em;
+            font-weight: bold;
+            pointer-events: none;
+            animation: floatUp 1s ease-out;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+        }
+        
+        @keyframes floatUp {
+            0% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(-100px);
+            }
+        }
+        
+        .feather-particle {
+            position: absolute;
+            font-size: 1.5em;
+            pointer-events: none;
+            animation: floatAway 1.5s ease-out;
+        }
+        
+        @keyframes floatAway {
+            0% {
+                opacity: 1;
+                transform: translateY(0) rotate(0deg);
+            }
+            100% {
+                opacity: 0;
+                transform: translateY(100px) rotate(360deg) translateX(50px);
+            }
+        }
+        
+        .upgrades {
+            background: rgba(0,0,0,0.3);
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            display: flex;
+            justify-content: space-around;
+            gap: 10px;
+        }
+        
+        .upgrade-btn {
+            background: linear-gradient(135deg, #DC143C, #8B0000);
+            border: 2px solid #FFD700;
+            border-radius: 10px;
+            padding: 10px 15px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s;
+            flex: 1;
+            font-size: 0.9em;
+        }
+        
+        .upgrade-btn:active {
+            transform: scale(0.95);
+        }
+        
+        .upgrade-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .upgrade-info {
+            font-size: 0.8em;
+            opacity: 0.8;
+        }
+        
+        .stats {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+            backdrop-filter: blur(10px);
+        }
+        
+        .achievements {
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #FFD700, #FFA500);
+            color: #000;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.5);
+            text-align: center;
+            z-index: 1000;
+            animation: slideDown 0.5s ease-out;
+        }
+        
+        @keyframes slideDown {
+            from {
+                transform: translateX(-50%) translateY(-100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .community-links {
+            background: rgba(0,0,0,0.3);
+            padding: 10px;
+            text-align: center;
+            font-size: 0.9em;
+        }
+        
+        .community-links a {
+            color: #FFD700;
+            margin: 0 10px;
+            text-decoration: none;
+        }
+        
+        .intro-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 2000;
+            padding: 20px;
+        }
+        
+        .intro-content {
+            background: linear-gradient(135deg, #8B0000, #DC143C);
+            border: 3px solid #FFD700;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 400px;
+            text-align: center;
+        }
+        
+        .intro-content h1 {
+            color: #FFD700;
+            margin-bottom: 20px;
+        }
+        
+        .intro-content img {
+            width: 120px;
+            margin: 20px 0;
+        }
+        
+        .start-btn {
+            background: #FFD700;
+            color: #8B0000;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            font-weight: bold;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="intro-modal" id="intro">
+        <div class="intro-content">
+            <h1>🔴 NC Blockchain Cardinal</h1>
+            <img src="cardinal.png" alt="NC Cardinal">
+            <p>Tap the Cardinal to earn $CARD tokens!</p>
+            <p>Build the NC Blockchain community one tap at a time!</p>
+            <button class="start-btn" onclick="startGame()">Start Tapping!</button>
+        </div>
+    </div>
+    
+    <div class="game-container">
+        <div class="header">
+            <div class="logo-container">
+                <img src="nc-logo.png" alt="NC Blockchain" style="height: 60px; margin-bottom: 10px;">
+            </div>
+            <div class="balance">
+                <span class="coins" id="balance">0</span> $CARD
+            </div>
+            <div class="energy-bar">
+                <div class="energy-fill" id="energy-fill"></div>
+                <div class="energy-text">
+                    <span id="energy">100</span>/<span id="energy-max">100</span> ⚡
+                </div>
+            </div>
+        </div>
+        
+        <div class="tap-area" id="tap-area">
+            <div class="coin" id="coin">
+                <img src="cardinal.png" alt="NC Blockchain Cardinal" id="cardinal-img">
+            </div>
+        </div>
+        
+        <div class="stats">
+            Total Taps: <span id="total-taps">0</span> | 
+            Tap Power: <span id="tap-power">1</span>x |
+            Regen: <span id="regen-rate">1</span>/s |
+            Cardinal: <span id="cardinal-level">Baby</span>
+        </div>
+        
+        <div class="achievements" id="achievements" style="display: none;">
+            <h3>🏆 Achievement Unlocked!</h3>
+            <p id="achievement-text"></p>
+        </div>
+        
+        <div class="upgrades">
+            <button class="upgrade-btn" id="upgrade-power" onclick="upgrade('tapPower')">
+                <div>⚡ Power</div>
+                <div class="upgrade-info">Cost: <span id="power-cost">100</span></div>
+            </button>
+            <button class="upgrade-btn" id="upgrade-energy" onclick="upgrade('energyMax')">
+                <div>🔋 Energy</div>
+                <div class="upgrade-info">Cost: <span id="energy-cost">150</span></div>
+            </button>
+            <button class="upgrade-btn" id="upgrade-regen" onclick="upgrade('regenRate')">
+                <div>♻️ Regen</div>
+                <div class="upgrade-info">Cost: <span id="regen-cost">200</span></div>
+            </button>
+        </div>
+        
+        <div class="community-links">
+            <a href="https://ncblockchain.com" target="_blank">🌐 Website</a>
+            <a href="https://twitter.com/ncblockchain" target="_blank">🐦 Twitter</a>
+            <a href="https://t.me/ncblockchain" target="_blank">💬 Telegram</a>
+            <a href="https://github.com/biggleem/nc-cardinal-game" target="_blank">💻 GitHub</a>
+        </div>
+    </div>
+
+    <script>
+        // Game state
+        let gameData = {
+            balance: 0,
+            energy: 100,
+            energyMax: 100,
+            tapPower: 1,
+            totalTaps: 0,
+            regenRate: 1,
+            cardinalLevel: 1,
+            achievements: []
+        };
+        
+        // Load saved data
+        function loadGameData() {
+            const saved = localStorage.getItem('ncCardinalGame');
+            if (saved) {
+                gameData = JSON.parse(saved);
+            }
+            updateUI();
+        }
+        
+        // Save game data
+        function saveGameData() {
+            localStorage.setItem('ncCardinalGame', JSON.stringify(gameData));
+        }
+        
+        // Start game
+        function startGame() {
+            document.getElementById('intro').style.display = 'none';
+            loadGameData();
+            
+            // Start energy regeneration
+            setInterval(() => {
+                if (gameData.energy < gameData.energyMax) {
+                    gameData.energy = Math.min(gameData.energy + gameData.regenRate, gameData.energyMax);
+                    updateUI();
+                    saveGameData();
+                }
+            }, 1000);
+        }
+        
+        // Update UI
+        function updateUI() {
+            document.getElementById('balance').textContent = gameData.balance;
+            document.getElementById('energy').textContent = Math.floor(gameData.energy);
+            document.getElementById('energy-max').textContent = gameData.energyMax;
+            document.getElementById('total-taps').textContent = gameData.totalTaps;
+            document.getElementById('tap-power').textContent = gameData.tapPower;
+            document.getElementById('regen-rate').textContent = gameData.regenRate;
+            
+            const energyPercent = (gameData.energy / gameData.energyMax) * 100;
+            document.getElementById('energy-fill').style.width = energyPercent + '%';
+            
+            // Update upgrade costs
+            const costs = calculateUpgradeCosts();
+            document.getElementById('power-cost').textContent = costs.tapPower;
+            document.getElementById('energy-cost').textContent = costs.energyMax;
+            document.getElementById('regen-cost').textContent = costs.regenRate;
+            
+            // Enable/disable upgrade buttons
+            document.getElementById('upgrade-power').disabled = gameData.balance < costs.tapPower;
+            document.getElementById('upgrade-energy').disabled = gameData.balance < costs.energyMax;
+            document.getElementById('upgrade-regen').disabled = gameData.balance < costs.regenRate;
+            
+            // Update cardinal level
+            document.getElementById('cardinal-level').textContent = getCardinalName(gameData.cardinalLevel);
+        }
+        
+        // Calculate upgrade costs
+        function calculateUpgradeCosts() {
+            return {
+                tapPower: Math.floor(100 * Math.pow(2, gameData.tapPower - 1)),
+                energyMax: Math.floor(150 * Math.pow(2, (gameData.energyMax - 100) / 50)),
+                regenRate: Math.floor(200 * Math.pow(2, gameData.regenRate - 1))
+            };
+        }
+        
+        // Get cardinal name
+        function getCardinalName(level) {
+            const names = ['Baby', 'Young', 'Adult', 'Elder', 'Legendary'];
+            return names[level - 1] || 'Cardinal';
+        }
+        
+        // Handle tap
+        function handleTap(event) {
+            if (gameData.energy < 1) {
+                return;
+            }
+            
+            // Visual feedback
+            const coin = document.getElementById('coin');
+            const cardinalImg = document.getElementById('cardinal-img');
+            coin.classList.add('tapped');
+            cardinalImg.classList.add('flap');
+            setTimeout(() => {
+                coin.classList.remove('tapped');
+                cardinalImg.classList.remove('flap');
+            }, 500);
+            
+            // Show tap effect
+            const tapArea = document.getElementById('tap-area');
+            const effect = document.createElement('div');
+            effect.className = 'tap-effect';
+            effect.textContent = `+${gameData.tapPower}`;
+            effect.style.left = (event.clientX || tapArea.offsetWidth/2) + 'px';
+            effect.style.top = (event.clientY || tapArea.offsetHeight/2) + 'px';
+            tapArea.appendChild(effect);
+            setTimeout(() => effect.remove(), 1000);
+            
+            // Add feather particles
+            for (let i = 0; i < 3; i++) {
+                const feather = document.createElement('div');
+                feather.className = 'feather-particle';
+                feather.textContent = '🪶';
+                feather.style.left = (event.clientX || tapArea.offsetWidth/2) + (Math.random() * 40 - 20) + 'px';
+                feather.style.top = (event.clientY || tapArea.offsetHeight/2) + 'px';
+                tapArea.appendChild(feather);
+                setTimeout(() => feather.remove(), 1500);
+            }
+            
+            // Update game state
+            gameData.energy -= 1;
+            gameData.balance += gameData.tapPower;
+            gameData.totalTaps += 1;
+            
+            // Check for cardinal evolution
+            const requirements = [1000, 10000, 50000, 100000];
+            for (let i = 0; i < requirements.length; i++) {
+                if (gameData.totalTaps >= requirements[i] && gameData.cardinalLevel <= i + 1) {
+                    gameData.cardinalLevel = i + 2;
+                    showAchievement(`🦅 Cardinal Evolved to ${getCardinalName(gameData.cardinalLevel)}!`);
+                }
+            }
+            
+            updateUI();
+            saveGameData();
+        }
+        
+        // Show achievement
+        function showAchievement(text) {
+            const achievementDiv = document.getElementById('achievements');
+            const achievementText = document.getElementById('achievement-text');
+            
+            achievementText.textContent = text;
+            achievementDiv.style.display = 'block';
+            
+            setTimeout(() => {
+                achievementDiv.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Handle upgrades
+        function upgrade(type) {
+            const costs = calculateUpgradeCosts();
+            
+            if (gameData.balance < costs[type]) {
+                return;
+            }
+            
+            gameData.balance -= costs[type];
+            
+            switch(type) {
+                case 'tapPower':
+                    gameData.tapPower += 1;
+                    break;
+                case 'energyMax':
+                    gameData.energyMax += 50;
+                    break;
+                case 'regenRate':
+                    gameData.regenRate += 1;
+                    break;
+            }
+            
+            updateUI();
+            saveGameData();
+        }
+        
+        // Event listeners
+        document.getElementById('coin').addEventListener('click', handleTap);
+        document.getElementById('coin').addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleTap(e.touches[0]);
+        });
+    </script>
+</body>
+</html>
