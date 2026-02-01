@@ -7,6 +7,15 @@
     <meta property="og:title" content="NC Blockchain Cardinal Clicker">
     <meta property="og:description" content="Tap the Cardinal to earn $CARD tokens!">
     <meta property="og:image" content="https://biggleem.github.io/nc-cardinal-game/cardinal.png">
+    
+    <!-- PWA Support -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#e63946">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="NC Cardinal">
+    <link rel="apple-touch-icon" href="icon-512.png">
+    
     <script src="nc-integration.js"></script>
     <style>
         * {
@@ -722,6 +731,13 @@
             e.preventDefault();
             handleTap(e.touches[0]);
         });
+        
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed:', err));
+        }
     </script>
 </body>
 </html>
