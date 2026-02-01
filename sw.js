@@ -1,9 +1,10 @@
-const CACHE_NAME = 'nc-cardinal-v1';
+const CACHE_NAME = 'nc-cardinal-v2';
 const urlsToCache = [
   '/nc-cardinal-game/',
   '/nc-cardinal-game/index.html',
   '/nc-cardinal-game/icon-512.png',
   '/nc-cardinal-game/cardinal.png',
+  '/nc-cardinal-game/cardinal-voxel.png',
   '/nc-cardinal-game/nc-logo.png'
 ];
 
