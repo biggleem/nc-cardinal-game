@@ -1,4 +1,4 @@
-const CACHE_NAME = 'nc-cardinal-v2';
+const CACHE_NAME = 'nc-cardinal-v3';
 const urlsToCache = [
   '/nc-cardinal-game/',
   '/nc-cardinal-game/index.html',
