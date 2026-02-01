@@ -797,7 +797,7 @@
             </div>
             
             <!-- Cooldown Indicator -->
-            <div class="cooldown-indicator" id="cooldown-indicator"></div>
+            <div class="cooldown-indicator" id="cooldown-indicator" style="display:none;"></div>
         </div>
         
         <div class="tap-area" id="tap-area">
@@ -864,7 +864,7 @@
     <script>
         // Constants
         const DAILY_CLICK_CAP = 1000;
-        const COOLDOWN_MS = 3000;
+        const COOLDOWN_MS = 0;
         const EARLY_ADOPTER_CUTOFF = new Date('2026-02-01').getTime();
         
         // Game state
